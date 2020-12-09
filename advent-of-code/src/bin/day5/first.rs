@@ -3,31 +3,39 @@ use std::io::Read;
 
 fn main() {
     let mut input = String::new();
-    let _read_result = File::open("input.txt")
-        .unwrap()
-        .read_to_string(&mut input);
+    let _read_result = File::open("input.txt").unwrap().read_to_string(&mut input);
 
-    let string_vec: Vec<&str> = input.split("\n\n").collect();
+    let string_vec: Vec<&str> = input.split("\n").collect();
 
-    let valid_passports: usize = check_passports(string_vec);
-    println!("{}", valid_passports);
+    let total: Option<usize> = check_seat(string_vec);
+    println!("{:?}", total);
 }
 
-fn has_required_fields(passport: &str) -> bool {
-    let required_fields: Vec<&str> = vec!["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
-    let fields = passport
-        .split_whitespace()
-        .map(|field| field.split(':').collect::<Vec<&str>>()[0])
-        .filter(|field| field != &"cid")
-        .collect::<Vec<&str>>();
-
-
-    fields.len() == required_fields.len()
-}
-
-fn check_passports(input: Vec<&str>) -> usize {
-    input
+fn check_seat(vec: Vec<&str>) -> Option<usize> {
+    let max = vec
         .iter()
-        .filter(|p| has_required_fields(p))
-        .count()
+        .filter(|phrase| !phrase.to_string().is_empty())
+        .map(|phrase| {
+            let final_row = get_value(phrase);
+
+            final_row
+        })
+        .max();
+
+    max
+}
+
+fn get_value(phrase: &&str) -> usize {
+    let (row, col) = phrase.split_at(7);
+    let row = row.chars().fold(0, |acc, c| match c {
+        'F' => acc * 2,
+        'B' => acc * 2 + 1,
+        _ => panic!("Invalid boarding pass!"),
+    });
+    let col = col.chars().fold(0, |acc, c| match c {
+        'L' => acc * 2,
+        'R' => acc * 2 + 1,
+        _ => panic!("Invalid boarding pass!"),
+    });
+    row * 8 + col
 }
