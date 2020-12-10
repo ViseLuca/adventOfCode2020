@@ -2,8 +2,6 @@ use std::collections::HashSet;
 use std::fs::File;
 use std::io::Read;
 
-const ALL_QUESTIONS: &str = "abcdefghijklmnopqrstuvwxyz";
-
 fn main() {
     let mut input = String::new();
     let _read_result = File::open(
@@ -22,17 +20,8 @@ fn check_answers(vec: Vec<&str>) -> usize {
     vec.into_iter()
         .map(|row| {
             row.split_whitespace()
-                .fold(
-                    ALL_QUESTIONS.chars().collect(),
-                    |all_yes: HashSet<char>, person_answers: &str| {
-                        person_answers
-                            .chars()
-                            .collect::<HashSet<char>>()
-                            .intersection(&all_yes)
-                            .cloned()
-                            .collect()
-                    },
-                )
+                .flat_map(|p| p.chars())
+                .collect::<HashSet<_>>()
                 .len()
         })
         .sum()
